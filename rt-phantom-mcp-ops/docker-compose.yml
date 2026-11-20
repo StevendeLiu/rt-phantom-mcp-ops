@@ -1,0 +1,21 @@
+services:
+  qa-runner:
+    build: .
+    command: ["python3", "scripts/gamma_phantom_check.py", "--dd", "2.0", "--dta", "2.0", "--out", "reports/latest_qa_report.json"]
+    volumes:
+      - ./reports:/app/reports
+
+  mcp-server:
+    build: .
+    depends_on:
+      - qa-runner
+    ports:
+      - "8765:8765"
+    environment:
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8765
+      - FRP_RELAY_HOST=127.0.0.1
+      - FRP_RELAY_PORT=7000
+    volumes:
+      - ./reports:/app/reports
+    command: ["python3", "mcp_server/server.py"]
